@@ -182,23 +182,56 @@ describe('Async', () => {
 	});
 
 	describe('with an onInputChange prop', () => {
-
 		let input;
-		const onInputChange = v => input = v;
 
-		beforeEach(() => {
+		describe('with simple check', () => {
+			const onInputChange = v => input = v;
 
-			// Render an instance of the component
-			renderer.render(<Select.Async
-				loadOptions={loadOptions}
-				minimumInput={1}
-				onInputChange={onInputChange}
-			/>);
+			beforeEach(() => {
+
+				// Render an instance of the component
+				renderer.render(<Select.Async
+					loadOptions={loadOptions}
+					minimumInput={1}
+					onInputChange={onInputChange}
+				/>);
+			});
+
+			it('calls through to the provided onInputChange function', () => {
+				typeSearchText('hi');
+				return expect(input, 'to equal', 'hi');
+			});
 		});
 
-		it('calls through to the provided onInputChange function', () => {
-			typeSearchText('hi');
-			return expect(input, 'to equal', 'hi');
+		describe('with modification', () => {
+			const onInputChange = v => v.replace(/^\s+/, '');
+			let component;
+
+			beforeEach(() => {
+				// Render a deep instance of the component
+				component = TestUtils.renderIntoDocument(<Select.Async
+					loadOptions={loadOptions}
+					minimumInput={3}
+					onInputChange={onInputChange}
+					cache={{}}
+				/>);
+			});
+
+			it('updates Select value if below length', () => {
+				const inputField = TestUtils.findRenderedDOMComponentWithTag(component, 'input');
+				inputField.value = ' h';
+				TestUtils.Simulate.change(inputField);
+				expect(inputField.value, 'to equal', 'h');
+			});
+
+			it('updates Select value if in cached results', () => {
+				const inputField = TestUtils.findRenderedDOMComponentWithTag(component, 'input');
+				inputField.value = 'hhhh';
+				TestUtils.Simulate.change(inputField);
+				inputField.value = '	hhhh';
+				TestUtils.Simulate.change(inputField);
+				expect(inputField.value, 'to equal', 'hhhh');
+			});
 		});
 	});
 
