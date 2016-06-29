@@ -123,13 +123,15 @@ const Async = React.createClass({
 
 		this._lastInput = input;
 		if (input.length < this.props.minimumInput) {
-			return this.resetState();
+			this.resetState();
+			return input;
 		}
 		let cacheResult = getFromCache(this.state.cache, input);
 		if (cacheResult) {
-			return this.setState({
+			this.setState({
 				options: cacheResult.options,
 			});
+			return input;
 		}
 		this.setState({
 			isLoading: true,
